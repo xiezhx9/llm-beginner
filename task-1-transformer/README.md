@@ -138,6 +138,31 @@ python eval/run.py
 - NNDL2 第 8 章「注意力机制」「自注意力」「Transformer 模型」三节
 - 实践书 v2《注意力机制》章
 
+## 本次实现与运行
+
+实现代码位于 `src/`，包含手写 scaled dot-product attention、多头注意力、
+Transformer encoder block、中文情感分类器，以及训练过程可视化。
+
+```bash
+python data/download.py
+python -m src.train
+python eval/run.py
+```
+
+训练脚本会记录训练/验证损失、裁剪前的全局梯度范数，并针对固定探针句
+逐 epoch 采集指定 Query token 的多头注意力。正式训练结果位于
+[`artifacts/attention_evolution_run`](artifacts/attention_evolution_run)：
+
+- [`loss_curve.png`](artifacts/attention_evolution_run/loss_curve.png)
+- [`gradient_norm.png`](artifacts/attention_evolution_run/gradient_norm.png)
+- [`attention_heatmap.png`](artifacts/attention_evolution_run/attention_heatmap.png)
+- [`attention_evolution.png`](artifacts/attention_evolution_run/attention_evolution.png)
+- [`attention_evolution_all_heads.png`](artifacts/attention_evolution_run/attention_evolution_all_heads.png)
+- [`attention_evolution.gif`](artifacts/attention_evolution_run/attention_evolution.gif)
+
+本地自检结果：attention 最大误差 `7.15e-7`，causal mask 泄漏误差 `0`，
+验证集分类准确率约 `0.845`。
+
 ## 提交
 
 到 [nndl-discussion](https://github.com/nndl/nndl-discussion/discussions) 「llm-beginner 实践成果」分类发帖，附：

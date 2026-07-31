@@ -1,8 +1,12 @@
 data/cache/
 data/*.parquet
+data/*.arrow
 ckpt/
 src/__pycache__/
 eval/__pycache__/
 eval/result.json
 *.pyc
 .venv/
+.DS_Store
+artifacts/*.json
+artifacts/*.png

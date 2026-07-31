@@ -23,7 +23,11 @@ def main():
         sys.exit("[错误] 缺少依赖：pip install datasets pyarrow")
 
     print("正在下载 seamew/ChnSentiCorp ...")
-    ds = load_dataset("seamew/ChnSentiCorp", cache_dir=str(DATA_DIR / "cache"))
+    ds = load_dataset(
+        "seamew/ChnSentiCorp",
+        cache_dir=str(DATA_DIR / "cache"),
+        trust_remote_code=True,
+    )
 
     for split in ds.keys():
         out = DATA_DIR / f"{split}.parquet"

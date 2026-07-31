@@ -163,6 +163,11 @@ python eval/run.py
 本地自检结果：attention 最大误差 `7.15e-7`，causal mask 泄漏误差 `0`，
 验证集分类准确率约 `0.845`。
 
+学习笔记：
+
+- [`notes/Chapter8-注意力机制与Transformer.md`](notes/Chapter8-注意力机制与Transformer.md)
+- [`notes/Task1-Transformer分类器实现与工程技巧.md`](notes/Task1-Transformer分类器实现与工程技巧.md)
+
 ## 提交
 
 到 [nndl-discussion](https://github.com/nndl/nndl-discussion/discussions) 「llm-beginner 实践成果」分类发帖，附：

@@ -6,6 +6,7 @@
   python data/download.py --dataset tinystories   # TinyStories（英文故事语料，约百 MB 量级）
   python data/download.py --dataset skypile       # SkyPile 子集提示（需手动抽样）
 """
+# %%
 import argparse
 import json
 import os
@@ -13,9 +14,10 @@ import shutil
 import sys
 from pathlib import Path
 
+
 DATA_DIR = Path(__file__).parent
 ROOT = DATA_DIR.parent.parent  # llm-beginner 仓库根
-
+# %%
 
 def write_dataset_info(dataset, ppl_threshold, extra=None):
     info = {
@@ -62,7 +64,7 @@ def write_hf_text_split(split, out_path):
                 f.write(text)
                 f.write("\n\n")
 
-
+# %%
 def get_tinystories():
     if "HF_ENDPOINT" not in os.environ:
         print("[提示] 下载慢可设 HF_ENDPOINT=https://hf-mirror.com\n")
@@ -84,7 +86,8 @@ def get_tinystories():
     write_dataset_info("tinystories", ppl_threshold=10,
                        extra={"note": "TinyStories 是英文故事语料；中文训练可换用 SkyPile 子集或其他中文语料。"})
     print("已额外生成 train.txt / dev.txt，供 eval/run.py 计算困惑度。")
-
+#get_tinystories()
+# %%
 
 def get_skypile():
     print("SkyPile-150B 体量大，建议手动选 streaming 子集并显式切出 train/dev：")

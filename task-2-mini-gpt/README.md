@@ -143,6 +143,15 @@ python eval/run.py
 
 结果写入 `eval/result.json`，提交时附上。
 
+## 学习笔记
+
+- [`notes/Task2-miniGPT学习索引.md`](notes/Task2-miniGPT学习索引.md)
+- [`notes/Task2-01-Byte-Level-BPE分词器.md`](notes/Task2-01-Byte-Level-BPE分词器.md)
+- [`notes/Task2-02-RoPE旋转位置编码.md`](notes/Task2-02-RoPE旋转位置编码.md)
+- [`notes/Task2-03-Causal-Attention与KV-Cache.md`](notes/Task2-03-Causal-Attention与KV-Cache.md)
+- [`notes/Task2-04-miniGPT模型构建与生成.md`](notes/Task2-04-miniGPT模型构建与生成.md)
+- [`notes/Task2-05-训练评估与困惑度调优.md`](notes/Task2-05-训练评估与困惑度调优.md)
+
 ## AI Tutor 反馈
 
 把 [eval/tutor_prompt.md](eval/tutor_prompt.md) 整段贴给 Claude / Qwen / DeepSeek，连同你的代码。模型会按统一格式（必检 / 加分 / 优先级）给你针对性 review。

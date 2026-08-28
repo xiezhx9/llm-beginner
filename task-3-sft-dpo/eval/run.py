@@ -1,4 +1,5 @@
 """任务三自检：LoRA 参数量 + loss masking + SFT vs base 输出对比。"""
+# %%
 import sys
 from pathlib import Path
 
@@ -58,7 +59,7 @@ def test_loss_masking():
     text = format_messages(msgs)
     tok = AutoTokenizer.from_pretrained(str(model_path))
     ids = tok(text, return_tensors="pt").input_ids[0]
-    labels = build_labels(ids, msgs)
+    labels = build_labels(ids, msgs, tok)
 
     if labels.shape != ids.shape:
         return {"test": "loss_masking", "pass": False,
@@ -70,8 +71,20 @@ def test_loss_masking():
             "pass": lo < mask_ratio < hi,
             "mask_ratio": round(mask_ratio, 3),
             "note": f"若不在 {MASK_RATIO_RANGE} 范围，请检查 user/system 是否全部 -100"}
-
-
+# from src.chat import format_messages, build_labels
+# msgs = [
+#     {"role": "user", "content": "你好"},
+#     {"role": "assistant", "content": "你好！很高兴见到你。"},
+#     {"role": "user", "content": "请介绍一下深度学习"},
+#     {"role": "assistant", "content": "深度学习是机器学习的一个分支，使用多层神经网络。"},
+# ]
+# model_path = ROOT / "models" / "Qwen2.5-0.5B"
+# from transformers import AutoTokenizer
+# text = format_messages(msgs)
+# tok = AutoTokenizer.from_pretrained(str(model_path))
+# ids = tok(text, return_tensors="pt").input_ids[0]
+# tok(text, return_tensors="pt").input_ids
+# %%
 def test_sft_vs_base():
     sft_ckpt = ROOT / "ckpt" / "sft"
     if not sft_ckpt.exists():

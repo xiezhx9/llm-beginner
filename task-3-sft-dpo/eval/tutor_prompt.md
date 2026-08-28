@@ -21,7 +21,7 @@
 ### 必检项
 
 1. **手写 LoRA**
-   - 低秩矩阵 A、B 形状是否对（A: in×r, B: r×out）？
+   - 按 `F.linear` 权重约定，低秩矩阵形状是否为 A: `[r, in]`、B: `[out, r]`，前向是否等价于 `x @ A.T @ B.T`？
    - 初始化：A 用 kaiming，B 用零？
    - scaling 是否 = `alpha / r`？
    - forward 是否正确叠加：`y = Wx + scaling * B(A x)`？

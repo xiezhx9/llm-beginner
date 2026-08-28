@@ -1,7 +1,15 @@
 data/cache/
 data/*.parquet
 data/*.jsonl
-ckpt/
+data/manifest.json
+data/ceval/*.jsonl
+data/dpo/*.jsonl
+data/moss-plugin/*.jsonl
+data/moss-sft/*.jsonl
+ckpt/*
+!ckpt/sft/
+!ckpt/sft/lora_dict.pt
+!ckpt/sft/metadata.json
 models/
 src/__pycache__/
 eval/__pycache__/

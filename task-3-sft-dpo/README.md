@@ -20,7 +20,7 @@
 
 | | 内容 |
 |---|---|
-| **给你** | Qwen2.5-0.5B 基座（`data/download.py` 拉到 `models/Qwen2.5-0.5B`）/ MOSS-003-sft 中英对话数据（jsonl.zip）/ DPO 偏好数据自选（hiyouga/DPO-En-Zh-20k 等）/ PyTorch 2.7+ / 单卡 GPU（0.5B + LoRA 显存友好，8GB 可跑） |
+| **给你** | Qwen2.5-0.5B 基座（`data/download.py` 拉到 `models/Qwen2.5-0.5B`）/ MOSS 普通与插件对话子集 / 中英 DPO 偏好子集 / C-Eval 固定子集 / `uv` 管理的 Python 3.11 环境 |
 | **交付** | 1. `ckpt/sft/`（SFT 后的 LoRA 权重目录） 2. `ckpt/dpo/`（DPO 后的 LoRA 权重目录） 3. `src/compare.py` 跑出的 base / SFT / DPO 对比样例 4. `eval/result.json`（自检结果） 5. 一段 200–500 字实验观察 |
 
 ## Definition of Done
@@ -32,7 +32,7 @@
 - [ ] **M3** 用 MOSS-003-sft 数据跑 SFT，产出非空 `ckpt/sft/`，自检 `sft_vs_base` 通过
 - [ ] **M4** 在 SFT 之上跑 DPO，产出 `ckpt/dpo/`，并用 `src/compare.py` 在同一指令上对比 base / SFT / DPO 输出
 
-加分（任选）：
+扩展目标（本学习版本要求全部完成）：
 
 - [ ] **S1** 全量微调 vs LoRA：显存占用与下游质量对比
 - [ ] **S2** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
@@ -45,25 +45,30 @@
 ### 第 1-2 天：环境 + 模型 + 数据
 
 ```bash
-pip install -r requirements.txt
-python data/download.py
+uv sync
+uv run python data/download.py
 ```
 
-`data/download.py` 会把 Qwen2.5-0.5B 拉到 `models/Qwen2.5-0.5B`，并打印 SFT / plugin / DPO 数据的下载提示（自检按这个路径找基座）。按提示取数据：
+Task 3 使用目录内独立的 `.venv` 和 `uv.lock`。以后所有命令统一加 `uv run`，VS Code 解释器选择 `task-3-sft-dpo/.venv/bin/python`；需要 Notebook 时运行：
 
 ```bash
-# SFT 数据（推荐直接下 jsonl.zip，避免 dataset viewer / 自动 builder 解析大文件失败）
-huggingface-cli download OpenMOSS-Team/moss-003-sft-data \
-  moss-003-sft-no-tools.jsonl.zip --repo-type dataset --local-dir ./data/moss-sft
-
-# DPO 偏好数据自选，如 hiyouga/DPO-En-Zh-20k（中英混合）
-# 也可自行用 GPT-4 / Claude 给已有 SFT 数据打偏好标签
+uv run jupyter lab
 ```
+
+`data/download.py` 会准备基座和以下固定子集，并在 `data/manifest.json` 记录来源、数量与随机种子：
+
+| 路径 | 默认规模 | 用途 |
+|---|---:|---|
+| `data/moss-sft/train.jsonl` / `eval.jsonl` | 2000 / 200 | M2、M3 与 S1、S2 |
+| `data/dpo/train.jsonl` / `eval.jsonl` | 2000 / 200 | M4 与 S4，中英文各占一半 |
+| `data/ceval/validation.jsonl` | 80 | S3，覆盖 8 个学科 |
+| `data/moss-plugin/train.jsonl` / `eval.jsonl` | 1000 / 100 | S5 工具调用 SFT |
+| `models/Qwen2.5-0.5B/` | 0.5B 参数 | 所有训练与评测的共同基座 |
 
 **常见坑**：
 
-- 不设 `HF_ENDPOINT` 下载慢：境内可设 `HF_ENDPOINT=https://hf-mirror.com`
-- 直接跑 dataset viewer / `load_dataset` 拉 MOSS 大文件容易解析失败，按提示下 jsonl.zip 自己读
+- 首次执行会下载约 1 GB 基座与约 80 MB DPO 原始文件；MOSS 使用流式解压，达到样本预算后停止，不下载完整 2.68 GB 压缩包
+- 数据子集默认固定 `seed=42`，不要为不同实验重新抽样，否则 S1/S2/S3/S4 的比较不公平
 - 自检按 `models/Qwen2.5-0.5B` 这个固定路径找基座，模型放别处会被判 `[跳过]` 而不是通过
 
 ### 第 3-6 天：手写 LoRA（M1）
@@ -75,7 +80,7 @@ huggingface-cli download OpenMOSS-Team/moss-003-sft-data \
 
 **常见坑**：
 
-- A、B 形状对调：A 是 `in×r`、B 是 `r×out`；初始化 A 用 kaiming、B 用零，否则一开始就改变输出
+- A、B 形状对调：按 `F.linear` 的权重存储约定，A 是 `[r, in]`、B 是 `[out, r]`，前向为 `x @ A.T @ B.T`；初始化 A 用 kaiming、B 用零，否则一开始就改变输出
 - scaling 忘了写成 `alpha / r`：换 rank 时等效学习率会跟着漂
 - 原权重 W 没设 `requires_grad=False`：可训参数占比超 5%，`lora_param_count` 直接挂
 - `merge_lora` 合并后没和未合并前向对齐、或没清理 LoRA 分支：推理结果会和训练时不一致
@@ -123,17 +128,35 @@ huggingface-cli download OpenMOSS-Team/moss-003-sft-data \
 
 | 文件 | 必须导出 |
 |---|---|
-| `src/lora.py` | `inject_lora(model, target_modules, r, alpha) -> model`、`merge_lora(model) -> model` |
-| `src/chat.py` | `format_messages(messages: List[dict]) -> str` 应用 Qwen chat template；`build_labels(input_ids, messages) -> labels` 做 loss masking |
+| `src/lora.py` | `LoRALinear`、`inject_lora(model, target_modules, r, alpha) -> model`、`merge_lora(model) -> model`、adapter 保存/加载接口 |
+| `src/chat.py` | `format_messages(messages) -> str` 应用 Qwen chat template；`build_labels(input_ids, messages, tokenizer) -> labels` 做 loss masking |
+| `src/data.py` | MOSS/DPO record 解析、`SFTDataset`、`PreferenceDataset` 与两个 collator |
+| `src/losses.py` | `sequence_log_probs(...)` 与 `dpo_loss(...)` |
+| `train_sft.py` | `SFTConfig`、模型/数据/optimizer 构建与 `train_sft(config)` |
+| `train_dpo.py` | `DPOConfig`、policy/reference 构建与 `train_dpo(config)` |
+| `src/compare.py` | 加载 base/SFT/DPO、统一生成并对比输出 |
+| `src/benchmarks.py` | C-Eval 加载、提示构造、答案抽取与灾难性遗忘报告 |
+| `src/experiments.py` | 全量/LoRA、rank 消融、偏好指标与 reward margin 曲线 |
+| `train_plugin_sft.py` | MOSS 工具轨迹 SFT 配置、数据加载与训练入口 |
+| `run_bonus.py` | S1-S5 的统一实验入口与报告目录 |
 | `ckpt/sft/` | SFT 后的 LoRA 权重目录 |
 | `ckpt/dpo/` | DPO 后的 LoRA 权重目录 |
 
 接口可以改，但改了请同步调整 `eval/run.py`。
 
+代码骨架中的核心函数会抛出 `NotImplementedError`。建议依次完成：
+
+1. `src/lora.py` 的单层前向、注入、合并与 adapter 持久化；
+2. `src/chat.py` 的模板和 assistant-only labels；
+3. `src/data.py` 与 `train_sft.py`；
+4. `src/losses.py` 与 `train_dpo.py`；
+5. `src/compare.py`。
+6. `src/experiments.py`、`src/benchmarks.py`、`train_plugin_sft.py` 与 `run_bonus.py` 的 S1-S5。
+
 ## 自检
 
 ```bash
-python eval/run.py
+uv run python eval/run.py
 ```
 
 | 测试 | 通过标准 | 对应 DoD |

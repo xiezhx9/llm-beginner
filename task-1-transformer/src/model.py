@@ -7,6 +7,9 @@ from .block import TransformerBlock
 from .SinusoidalPE import SinusoidalPE
 
 
+
+# %%
+
 def load_for_eval(
     ckpt_path: str,
 ):  # -> tuple[TransformerClassifier, Callable[[str], torch.Tensor]]:

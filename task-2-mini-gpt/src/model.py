@@ -17,14 +17,13 @@ from src.tokenizer import BPETokenizer
 ModelKVCache: TypeAlias = list[KVCache]
 
 
-# %%
 # import torch
 # a = torch.Tensor([2,4,4])
 # probs = torch.tensor([0.2, 0.3, 0.5])
 # idx = torch.multinomial(probs, num_samples=1)       # scalar
 # idx = torch.multinomial(probs, num_samples=5, replacement=False)  # [5]
 # idx
-# %%
+
 @dataclass
 class MiniGPTConfig:
     """Hyperparameters required to construct a MiniGPT model."""
@@ -248,3 +247,4 @@ def load_for_eval(ckpt_path: str | Path) -> tuple[MiniGPT, BPETokenizer]:
     model.eval()
 
     return model, bpe
+# %%

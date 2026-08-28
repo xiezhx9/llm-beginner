@@ -143,6 +143,29 @@ python eval/run.py
 
 结果写入 `eval/result.json`，提交时附上。
 
+## 命令行对话 Demo
+
+加载 `ckpt/best.pt` 及同目录下的 tokenizer/config，启动交互式续写：
+
+```bash
+uv run python demo_chat.py
+```
+
+输入 `/clear` 清空对话历史，输入 `/quit` 退出。也可以运行单轮生成：
+
+```bash
+uv run python demo_chat.py \
+  --prompt "春天来了" \
+  --max-new-tokens 24 \
+  --temperature 0.8 \
+  --top-k 40 \
+  --top-p 0.9
+```
+
+Demo 会自动截取最新上下文以满足模型的 `block_size`，而一次 `generate()`
+内部会维护 KV cache。当前 checkpoint 只在唐诗小语料上做过 next-token
+预训练，没有经过指令微调，因此输出更接近诗歌续写，而不是真正的问答助手。
+
 ## AI Tutor 反馈
 
 把 [eval/tutor_prompt.md](eval/tutor_prompt.md) 整段贴给 Claude / Qwen / DeepSeek，连同你的代码。模型会按统一格式（必检 / 加分 / 优先级）给你针对性 review。

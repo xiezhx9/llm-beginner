@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import random
 import struct
 import zlib
@@ -55,7 +56,8 @@ class DataPrepConfig:
 
 
 def _resolve_url(repo_id: str, filename: str) -> str:
-    return f"https://huggingface.co/datasets/{repo_id}/resolve/main/{filename}"
+    endpoint = os.environ.get("HF_ENDPOINT", "https://huggingface.co").rstrip("/")
+    return f"{endpoint}/datasets/{repo_id}/resolve/main/{filename}"
 
 
 def _read_exact(stream: Any, size: int) -> bytes:

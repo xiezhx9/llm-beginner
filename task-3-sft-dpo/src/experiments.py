@@ -86,6 +86,63 @@ def count_parameters(model: nn.Module) -> tuple[int, int]:
     return trainable, total
 
 
+def peak_memory_bytes(device: str | Any = "cpu") -> int:
+    """Return peak accelerator memory or peak process resident memory.
+
+    CUDA reports allocated tensor memory. CPU runs report the operating
+    system's peak resident working set for the isolated experiment process.
+    """
+
+    import sys
+
+    resolved_device = str(device)
+    if resolved_device.startswith("cuda") and torch.cuda.is_available():
+        return int(torch.cuda.max_memory_allocated(torch.device(resolved_device)))
+
+    if sys.platform == "win32":
+        import ctypes
+        from ctypes import wintypes
+
+        class ProcessMemoryCounters(ctypes.Structure):
+            _fields_ = [
+                ("cb", wintypes.DWORD),
+                ("PageFaultCount", wintypes.DWORD),
+                ("PeakWorkingSetSize", ctypes.c_size_t),
+                ("WorkingSetSize", ctypes.c_size_t),
+                ("QuotaPeakPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaPeakNonPagedPoolUsage", ctypes.c_size_t),
+                ("QuotaNonPagedPoolUsage", ctypes.c_size_t),
+                ("PagefileUsage", ctypes.c_size_t),
+                ("PeakPagefileUsage", ctypes.c_size_t),
+            ]
+
+        counters = ProcessMemoryCounters()
+        counters.cb = ctypes.sizeof(counters)
+        get_current_process = ctypes.windll.kernel32.GetCurrentProcess
+        get_current_process.argtypes = []
+        get_current_process.restype = wintypes.HANDLE
+        get_process_memory_info = ctypes.windll.psapi.GetProcessMemoryInfo
+        get_process_memory_info.argtypes = [
+            wintypes.HANDLE,
+            ctypes.POINTER(ProcessMemoryCounters),
+            wintypes.DWORD,
+        ]
+        get_process_memory_info.restype = wintypes.BOOL
+
+        process = get_current_process()
+        if not get_process_memory_info(
+            process, ctypes.byref(counters), counters.cb
+        ):
+            raise ctypes.WinError()
+        return int(counters.PeakWorkingSetSize)
+
+    import resource
+
+    peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    return int(peak_rss if sys.platform == "darwin" else peak_rss * 1024)
+
+
 def run_sft_variant(
     config: SFTConfig,
     mode: FineTuneMode,
@@ -111,6 +168,9 @@ def run_sft_variant(
     device = torch.device(config.device or "cpu")
     model = model.to(device)
     model.train()
+
+    if device.type == "cuda":
+        torch.cuda.reset_peak_memory_stats(device)
 
     dataloader = build_sft_dataloader(tokenizer, config)
 
@@ -178,16 +238,7 @@ def run_sft_variant(
         eval_loss = eval_loss_sum / eval_token_count
 
     trainable_param_count, all_param_count = count_parameters(model)
-    import resource
-    import sys
-
-    peak_rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-
-    peak_memory_bytes = (
-        peak_rss
-        if sys.platform == "darwin"  # macOS 返回 bytes
-        else peak_rss * 1024  # Linux 返回 KiB
-    )
+    measured_peak_memory_bytes = peak_memory_bytes(device)
 
     from src.lora import save_lora_adapter
 
@@ -214,7 +265,7 @@ def run_sft_variant(
         mode,
         trainable_param_count,
         all_param_count,
-        peak_memory_bytes,
+        measured_peak_memory_bytes,
         wall_time_seconds,
         sum(losses[-10:]) / len(losses[-10:]),
         eval_loss,

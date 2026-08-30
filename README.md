@@ -4,6 +4,19 @@
 
 llm-beginner 可独立完成，无任何前置依赖。如果同时在读《神经网络与深度学习（第二版）》（下文简称 **NNDL2**）与配套的《神经网络与深度学习案例与实践（第二版）》（下文简称 **实践书 v2**），每个任务的"延伸阅读"会指向对应章节，配合读会更顺畅。
 
+## 已完成的独立项目
+
+Task 1-3 已拆分为可独立安装、运行和展示的仓库。每个仓库保留对应 Task 的 Git
+历史，并提供包含实现原理、代码技巧、实验结果和复现步骤的 README：
+
+| Task | 独立仓库 | 核心内容 | 当前结果 |
+|---|---|---|---|
+| Task 1 | [transformer-classifier-from-scratch](https://github.com/xiezhx9/transformer-classifier-from-scratch) | 手写多头注意力、Encoder Block、中文情感分类与注意力可视化 | Dev accuracy `0.845` |
+| Task 2 | [mini-gpt-from-scratch](https://github.com/xiezhx9/mini-gpt-from-scratch) | Byte-level BPE、RoPE、causal attention、KV cache 与自回归生成 | Dev PPL `45.16` |
+| Task 3 | [llm-sft-dpo-from-scratch](https://github.com/xiezhx9/llm-sft-dpo-from-scratch) | 手写 LoRA、assistant-only SFT、DPO 与工具调用评估 | M1-M4、S1-S5 完成 |
+
+本仓库继续作为六个任务的总学习路线与后续 Task 4-6 的开发入口。
+
 ## 相关教材
 
 作为本教程的学习材料，同步撰写了**《大模型与智能体》**，围绕共用基础、大模型、智能体、边界与未来四条主线展开，共 17 章。 [完整章节列表](https://nndl.ai/llm-agent/)。

@@ -3,6 +3,7 @@
 # %%
 from __future__ import annotations
 
+import argparse
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -47,7 +48,11 @@ def run_s1_full_vs_lora(config: BonusSuiteConfig) -> Any:
 
 def run_s2_rank_ablation(config: BonusSuiteConfig) -> Any:
     """Run LoRA ranks 4, 8, 16, and 32 with fixed controls."""
-    raise NotImplementedError("TODO: run bonus goal S2")
+    from src.experiments import run_lora_rank_ablation
+
+    report = run_lora_rank_ablation(config.sft, config.lora_ranks)
+    save_experiment_report(report, config.report_dir / "s2_bonus.json")
+    return report
 
 
 def run_s3_catastrophic_forgetting(config: BonusSuiteConfig) -> Any:
@@ -149,9 +154,29 @@ def run_bonus_suite(config: BonusSuiteConfig) -> dict[str, Any]:
     raise NotImplementedError("TODO: run all Task 3 bonus goals")
 
 
+def parse_args() -> argparse.Namespace:
+    """Select one bonus experiment while preserving spawn-safe script execution."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--goal",
+        choices=("s1", "s2", "s3", "s4", "s5"),
+        default="s1",
+        help="Bonus experiment to run (default: s1)",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    """Run the complete bonus suite with default settings."""
-    run_s1_full_vs_lora(BonusSuiteConfig())
+    """Run one selected bonus experiment with default settings."""
+    args = parse_args()
+    runners = {
+        "s1": run_s1_full_vs_lora,
+        "s2": run_s2_rank_ablation,
+        "s3": run_s3_catastrophic_forgetting,
+        "s4": run_s4_preference_comparison,
+        "s5": run_s5_plugin_sft,
+    }
+    runners[args.goal](BonusSuiteConfig())
 
 
 if __name__ == "__main__":

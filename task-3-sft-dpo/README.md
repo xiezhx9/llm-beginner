@@ -34,8 +34,8 @@
 
 扩展目标（本学习版本要求全部完成）：
 
-- [ ] **S1** 全量微调 vs LoRA：显存占用与下游质量对比
-- [ ] **S2** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
+- [x] **S1** 全量微调 vs LoRA：显存占用与下游质量对比
+- [x] **S2** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
 - [ ] **S3** 灾难性遗忘评估：C-Eval 子集上 base vs SFT
 - [ ] **S4** SFT-only vs SFT+DPO 在偏好上的差异（带 reward margin 曲线）
 - [ ] **S5** 贯通任务五：用 `moss-003-sft-plugin` 训一版带工具调用的 SFT 模型

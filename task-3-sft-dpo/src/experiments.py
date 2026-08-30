@@ -345,7 +345,29 @@ def run_lora_rank_ablation(
     ranks: Sequence[int] = (4, 8, 16, 32),
 ) -> RankAblationReport:
     """Run S2 while changing only LoRA rank and matched output paths."""
-    raise NotImplementedError("TODO: run the LoRA rank ablation")
+    from dataclasses import replace
+
+    rank_values = tuple(ranks)
+    if not rank_values:
+        raise ValueError("ranks cannot be empty")
+    if any(
+        isinstance(rank, bool) or not isinstance(rank, int) or rank <= 0
+        for rank in rank_values
+    ):
+        raise ValueError("every LoRA rank must be a positive integer")
+    if len(set(rank_values)) != len(rank_values):
+        raise ValueError("LoRA ranks must be unique")
+
+    runs: dict[int, TrainingRunMetrics] = {}
+    for rank in rank_values:
+        rank_config = replace(config, lora_r=rank)
+        runs[rank] = run_sft_variant_isolated(
+            rank_config,
+            "lora",
+            f"s2-rank-{rank}",
+        )
+
+    return RankAblationReport(runs=runs)
 
 
 import torch

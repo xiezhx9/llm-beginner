@@ -27,18 +27,18 @@
 
 必做 4 项，缺一不算完成：
 
-- [ ] **M1** 手写 LoRA 低秩注入，自检 `lora_param_count` 通过（注入后可训参数占比 < 5%）
-- [ ] **M2** 实现 Qwen chat template + loss masking，自检 `loss_masking` 通过（mock 多轮对话中 -100 占比落在 20%–90%，user/system 全 -100）
-- [ ] **M3** 用 MOSS-003-sft 数据跑 SFT，产出非空 `ckpt/sft/`，自检 `sft_vs_base` 通过
-- [ ] **M4** 在 SFT 之上跑 DPO，产出 `ckpt/dpo/`，并用 `src/compare.py` 在同一指令上对比 base / SFT / DPO 输出
+- [x] **M1** 手写 LoRA 低秩注入，自检 `lora_param_count` 通过（注入后可训参数占比 < 5%）
+- [x] **M2** 实现 Qwen chat template + loss masking，自检 `loss_masking` 通过（mock 多轮对话中 -100 占比落在 20%–90%，user/system 全 -100）
+- [x] **M3** 用 MOSS-003-sft 数据跑 SFT，产出非空 `ckpt/sft/`，自检 `sft_vs_base` 通过
+- [x] **M4** 在 SFT 之上跑 DPO，产出非空 `ckpt/dpo/`，并完成 base / SFT / DPO 同提示对比
 
 扩展目标（本学习版本要求全部完成）：
 
 - [x] **S1** 全量微调 vs LoRA：显存占用与下游质量对比
 - [x] **S2** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
 - [x] **S3** 灾难性遗忘评估：C-Eval 子集上 base vs SFT
-- [ ] **S4** SFT-only vs SFT+DPO 在偏好上的差异（带 reward margin 曲线）
-- [ ] **S5** 贯通任务五：用 `moss-003-sft-plugin` 训一版带工具调用的 SFT 模型
+- [x] **S4** SFT-only vs SFT+DPO 在偏好上的差异（带 reward margin 曲线）
+- [x] **S5** 贯通任务五：用 `moss-003-sft-plugin` 训一版带工具调用的 SFT 模型
 
 ## 实施步骤（建议节奏：2-3 周）
 
@@ -144,7 +144,7 @@ uv run jupyter lab
 
 接口可以改，但改了请同步调整 `eval/run.py`。
 
-代码骨架中的核心函数会抛出 `NotImplementedError`。建议依次完成：
+核心实现和 S1-S5 实验入口均已完成，代码按以下顺序组织：
 
 1. `src/lora.py` 的单层前向、注入、合并与 adapter 持久化；
 2. `src/chat.py` 的模板和 assistant-only labels；
@@ -168,7 +168,21 @@ uv run python eval/run.py
 > `lora_param_count` 与 `loss_masking` 都需要 `models/Qwen2.5-0.5B` 存在、`transformers` 已装，否则记 `[跳过]`；自检按固定参数 `target_modules=["q_proj","v_proj"], r=8, alpha=16` 调你的 `inject_lora`。
 > `sft_vs_base` 只校验 `ckpt/sft` 非空；输出质量请手动跑 `src/compare.py` 对比 base 与 SFT 并附在提交里。
 
-结果写入 `eval/result.json`，提交时附上。
+结果写入本地 `eval/result.json`。模型、数据、checkpoint 和生成报告均由
+`.gitignore` 排除，仓库只提交代码与实验纪要。
+
+扩展目标可以单独运行：
+
+```bash
+uv run python run_bonus.py --goal s1
+uv run python run_bonus.py --goal s2
+uv run python run_bonus.py --goal s3
+uv run python run_bonus.py --goal s4
+uv run python run_bonus.py --goal s5
+```
+
+`--goal all` 会从头顺序执行 S1-S5，包含全量微调和四轮 rank 消融，耗时和内存
+开销较大；日常复查应优先单独运行目标实验。
 
 ## AI Tutor 反馈
 

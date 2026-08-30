@@ -382,7 +382,7 @@ def evaluate_preference_model(
 ) -> PreferenceMetrics:
     """Measure chosen win rate and reward margins on fixed DPO pairs."""
 
-    from src.losses import DPOLossOutput, dpo_loss, sequence_log_probs
+    from src.losses import DPOLossOutput
     from train_dpo import compute_dpo_batch_loss
 
     pair_count = 0
@@ -402,6 +402,9 @@ def evaluate_preference_model(
 
         pair_count += loss.reward_margin.numel()
         margins.extend(loss.reward_margin.detach().tolist())
+
+    if pair_count == 0:
+        raise ValueError("preference evaluation requires at least one pair")
 
     return PreferenceMetrics(
         pair_count,

@@ -1,4 +1,4 @@
-"""Tool-calling SFT pipeline skeleton for bonus goal S5."""
+"""Tool-calling SFT pipeline for bonus goal S5."""
 
 from __future__ import annotations
 
@@ -67,7 +67,7 @@ def load_plugin_model_and_tokenizer(
 def build_plugin_dataloader(
     tokenizer: Any,
     config: PluginSFTConfig,
-    shuffle = True
+    shuffle: bool = True,
 ) -> DataLoader[Any]:
     """Build a DataLoader from prepared MOSS with-tools conversations."""
 
@@ -81,7 +81,7 @@ def build_plugin_dataloader(
     return DataLoader(
         dataset=dataset,
         batch_size=config.batch_size,
-        shuffle=True,
+        shuffle=shuffle,
         collate_fn=partial(collate_sft_batch, pad_token_id=tokenizer.pad_token_id),
     )
 

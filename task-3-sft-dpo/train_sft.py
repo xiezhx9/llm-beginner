@@ -1,4 +1,4 @@
-"""Supervised fine-tuning pipeline skeleton for Task 3."""
+"""Supervised fine-tuning pipeline for Task 3."""
 # %%
 from __future__ import annotations
 

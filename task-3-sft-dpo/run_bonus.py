@@ -1,4 +1,4 @@
-"""Unified entry-point skeleton for Task 3 bonus goals S1-S5."""
+"""Unified entry point for Task 3 bonus goals S1-S5."""
 
 # %%
 from __future__ import annotations
@@ -9,18 +9,12 @@ from pathlib import Path
 from typing import Any
 
 import torch
-from transformers import AutoModelForCausalLM
 
 from src.compare import CompareConfig, load_variant
 from src.experiments import compare_sft_vs_dpo_preference, save_experiment_report
-from src.lora import inject_lora, load_lora_adapter
-from train_dpo import (
-    DPOConfig,
-    build_dpo_dataloader,
-    load_policy_reference_and_tokenizer,
-)
+from train_dpo import DPOConfig, build_dpo_dataloader
 from train_plugin_sft import PluginSFTConfig
-from train_sft import SFTConfig, load_model_and_tokenizer
+from train_sft import SFTConfig
 
 
 @dataclass(frozen=True)
@@ -34,6 +28,7 @@ class BonusSuiteConfig:
     dpo_eval_path: Path = Path("data/dpo/eval.jsonl")
     report_dir: Path = Path("reports/bonus")
     lora_ranks: tuple[int, ...] = (4, 8, 16, 32)
+    s4_max_samples: int = 64
 
 
 def run_s1_full_vs_lora(config: BonusSuiteConfig) -> Any:
@@ -97,22 +92,33 @@ def run_s3_catastrophic_forgetting(config: BonusSuiteConfig) -> Any:
 def run_s4_preference_comparison(config: BonusSuiteConfig) -> Any:
     """Compare SFT and DPO preference metrics and save the margin curve."""
 
-    sft_model, sft_tok = load_variant(
+    device = config.dpo.device or "cpu"
+    sft_model, _ = load_variant(
         "sft",
         CompareConfig(
-            config.sft.model_path, config.sft.output_dir, config.dpo.output_dir
+            model_path=config.sft.model_path,
+            sft_adapter_path=config.sft.output_dir,
+            dpo_adapter_path=config.dpo.output_dir,
+            device=device,
         ),
     )
     dpo_model, dpo_tok = load_variant(
         "dpo",
         CompareConfig(
-            config.dpo.model_path, config.sft.output_dir, config.dpo.output_dir
+            model_path=config.dpo.model_path,
+            sft_adapter_path=config.sft.output_dir,
+            dpo_adapter_path=config.dpo.output_dir,
+            device=device,
         ),
     )
 
     from dataclasses import replace
 
-    eval_config = replace(config.dpo, train_path=config.dpo_eval_path)
+    eval_config = replace(
+        config.dpo,
+        train_path=config.dpo_eval_path,
+        max_samples=config.s4_max_samples,
+    )
 
     dataloader = build_dpo_dataloader(dpo_tok, eval_config, False)
 
@@ -125,7 +131,7 @@ def run_s4_preference_comparison(config: BonusSuiteConfig) -> Any:
 
 @torch.no_grad()
 def run_s5_plugin_sft(config: BonusSuiteConfig) -> Any:
-    """Train and evaluate the MOSS tool-calling SFT adapter."""
+    """Evaluate the trained MOSS tool-calling SFT adapter."""
 
     from src.benchmarks import evaluate_plugin_tool_calls
     from src.data import load_jsonl, parse_moss_plugin_record
@@ -160,7 +166,13 @@ def run_s5_plugin_sft(config: BonusSuiteConfig) -> Any:
 
 def run_bonus_suite(config: BonusSuiteConfig) -> dict[str, Any]:
     """Run S1-S5 and collect their reports under one directory."""
-    raise NotImplementedError("TODO: run all Task 3 bonus goals")
+    return {
+        "s1": run_s1_full_vs_lora(config),
+        "s2": run_s2_rank_ablation(config),
+        "s3": run_s3_catastrophic_forgetting(config),
+        "s4": run_s4_preference_comparison(config),
+        "s5": run_s5_plugin_sft(config),
+    }
 
 
 def parse_args() -> argparse.Namespace:
@@ -168,7 +180,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--goal",
-        choices=("s1", "s2", "s3", "s4", "s5"),
+        choices=("s1", "s2", "s3", "s4", "s5", "all"),
         default="s1",
         help="Bonus experiment to run (default: s1)",
     )
@@ -184,6 +196,7 @@ def main() -> None:
         "s3": run_s3_catastrophic_forgetting,
         "s4": run_s4_preference_comparison,
         "s5": run_s5_plugin_sft,
+        "all": run_bonus_suite,
     }
     runners[args.goal](BonusSuiteConfig())
 

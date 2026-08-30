@@ -1,4 +1,4 @@
-"""Direct preference optimization pipeline skeleton for Task 3."""
+"""Direct preference optimization pipeline for Task 3."""
 
 from __future__ import annotations
 

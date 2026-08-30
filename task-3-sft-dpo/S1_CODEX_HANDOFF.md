@@ -93,7 +93,7 @@ device="cpu"
 uv run python run_bonus.py
 ```
 
-`run_bonus.py` 的 `main()` 当前只调用 S1。执行结束后检查：
+`run_bonus.py` 的 `--goal` 默认值是 `s1`。执行结束后检查：
 
 ```bash
 ls ckpt/sft/s1-lora

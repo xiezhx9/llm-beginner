@@ -13,7 +13,10 @@ ckpt/*
 !ckpt/sft/metadata.json
 ckpt/sft/s1-*/
 ckpt/sft/s2-rank-*/
-reports/
+reports/*
+!reports/bonus/
+reports/bonus/*
+!reports/bonus/s1_bonus.json
 models/
 src/__pycache__/
 eval/__pycache__/

@@ -60,24 +60,33 @@ def run_s3_catastrophic_forgetting(config: BonusSuiteConfig) -> Any:
 
     from src.benchmarks import (
         compare_catastrophic_forgetting,
-        format_ceval_prompt,
         load_ceval_examples,
-        parse_ceval_example,
     )
 
-    base_model, base_tok = load_variant("base", CompareConfig(config.sft.model_path))
+    device = config.sft.device or "cpu"
+    base_model, base_tok = load_variant(
+        "base",
+        CompareConfig(model_path=config.sft.model_path, device=device),
+    )
 
-    sft_model, sft_tok = load_variant(
+    sft_model, _ = load_variant(
         "sft",
         CompareConfig(
-            config.sft.model_path, config.sft.output_dir, config.dpo.output_dir
+            model_path=config.sft.model_path,
+            sft_adapter_path=config.sft.output_dir,
+            dpo_adapter_path=config.dpo.output_dir,
+            device=device,
         ),
     )
 
     examples = load_ceval_examples(config.ceval_path, 80)
 
     report = compare_catastrophic_forgetting(
-        base_model, sft_model, base_tok, examples, "cpu"
+        base_model,
+        sft_model,
+        base_tok,
+        examples,
+        device,
     )
 
     save_experiment_report(report, config.report_dir / "s3_bonus.json")

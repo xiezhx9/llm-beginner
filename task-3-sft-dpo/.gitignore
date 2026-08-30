@@ -7,12 +7,7 @@ data/ceval/*.jsonl
 data/dpo/*.jsonl
 data/moss-plugin/*.jsonl
 data/moss-sft/*.jsonl
-ckpt/*
-!ckpt/sft/
-!ckpt/sft/lora_dict.pt
-!ckpt/sft/metadata.json
-ckpt/sft/s1-*/
-ckpt/sft/s2-rank-*/
+ckpt/
 reports/
 models/
 src/__pycache__/

@@ -34,11 +34,11 @@
 
 扩展目标（本学习版本要求全部完成）：
 
-- [x] **S1** 全量微调 vs LoRA：显存占用与下游质量对比
-- [x] **S2** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
-- [x] **S3** 灾难性遗忘评估：C-Eval 子集上 base vs SFT
-- [x] **S4** SFT-only vs SFT+DPO 在偏好上的差异（带 reward margin 曲线）
-- [x] **S5** 贯通任务五：用 `moss-003-sft-plugin` 训一版带工具调用的 SFT 模型
+- [x] **[S1](S1_FULL_VS_LORA.md)** 全量微调 vs LoRA：显存占用与下游质量对比
+- [x] **[S2](S2_RANK_ABLATION.md)** LoRA rank 消融（4 / 8 / 16 / 32）vs 质量
+- [x] **[S3](S3_CATASTROPHIC_FORGETTING.md)** 灾难性遗忘评估：C-Eval 子集上 base vs SFT
+- [x] **[S4](S4_PREFERENCE_COMPARISON.md)** SFT-only vs SFT+DPO 在偏好上的差异（带 reward margin 曲线）
+- [x] **[S5](S5_PLUGIN_SFT.md)** 用 `moss-003-sft-plugin` 训练带工具调用能力的 SFT 模型
 
 ## 实施步骤（建议节奏：2-3 周）
 
@@ -168,8 +168,9 @@ uv run python eval/run.py
 > `lora_param_count` 与 `loss_masking` 都需要 `models/Qwen2.5-0.5B` 存在、`transformers` 已装，否则记 `[跳过]`；自检按固定参数 `target_modules=["q_proj","v_proj"], r=8, alpha=16` 调你的 `inject_lora`。
 > `sft_vs_base` 只校验 `ckpt/sft` 非空；输出质量请手动跑 `src/compare.py` 对比 base 与 SFT 并附在提交里。
 
-结果写入本地 `eval/result.json`。模型、数据、checkpoint 和生成报告均由
-`.gitignore` 排除，仓库只提交代码与实验纪要。
+结果写入本地 `eval/result.json`。模型、数据、checkpoint 和大部分生成报告均由
+`.gitignore` 排除；S1 的固定实机指标 `reports/bonus/s1_bonus.json` 作为实验报告的
+原始依据纳入仓库。
 
 扩展目标可以单独运行：
 

@@ -16,11 +16,11 @@ base / SFT / DPO comparison: PASS，10 个相同提示
 
 | 实验 | 结论 |
 |---|---|
-| S1 全量 vs LoRA | LoRA 使用 3.31 GB 峰值 RAM、训练 68.95 秒；全量微调使用 10.78 GB、训练 130.20 秒。固定学习率下 LoRA 验证 loss 更低。 |
-| S2 Rank 消融 | rank 4/8/16/32 的验证 loss 差异不足 0.003；rank 4 参数最少且本次 loss 最低。 |
-| S3 灾难性遗忘 | C-Eval 从 30/80 提升到 34/80；当前小样本上没有观察到遗忘证据。 |
-| S4 偏好比较 | DPO chosen win rate 为 54.69%，mean margin 为 0.000536；方向正确但信号较弱。 |
-| S5 工具调用 | 20/20 格式有效，严格命令匹配 1/20；协议掌握稳定，参数精度不足。 |
+| [S1 全量 vs LoRA](S1_FULL_VS_LORA.md) | LoRA 使用 3.31 GB 峰值 RAM、训练 68.95 秒；全量微调使用 10.78 GB、训练 130.20 秒。固定学习率下 LoRA 验证 loss 更低。 |
+| [S2 Rank 消融](S2_RANK_ABLATION.md) | rank 4/8/16/32 的验证 loss 差异不足 0.003；rank 4 参数最少且本次 loss 最低。 |
+| [S3 灾难性遗忘](S3_CATASTROPHIC_FORGETTING.md) | C-Eval 从 30/80 提升到 34/80；当前小样本上没有观察到遗忘证据。 |
+| [S4 偏好比较](S4_PREFERENCE_COMPARISON.md) | DPO chosen win rate 为 54.69%，mean margin 为 0.000536；方向正确但信号较弱。 |
+| [S5 工具调用](S5_PLUGIN_SFT.md) | 20/20 格式有效，严格命令匹配 1/20；协议掌握稳定，参数精度不足。 |
 
 ## 实验观察
 
@@ -44,5 +44,5 @@ uv run python run_bonus.py --goal s4
 uv run python run_bonus.py --goal s5
 ```
 
-模型、数据、checkpoint、曲线和 JSON 报告均只保存在本地；Git 仓库保存代码、uv
-锁文件、复现说明和实验纪要。
+模型、数据、checkpoint、曲线和一般生成报告只保存在本地；S1 的固定实机指标
+`reports/bonus/s1_bonus.json` 随代码提交，作为资源对照报告的原始数据。

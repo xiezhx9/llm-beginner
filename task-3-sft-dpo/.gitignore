@@ -8,7 +8,10 @@ data/dpo/*.jsonl
 data/moss-plugin/*.jsonl
 data/moss-sft/*.jsonl
 ckpt/
-reports/
+reports/*
+!reports/bonus/
+reports/bonus/*
+!reports/bonus/s1_bonus.json
 models/
 src/__pycache__/
 eval/__pycache__/

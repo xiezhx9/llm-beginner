@@ -1,0 +1,24 @@
+{
+  "full": {
+    "name": "s1-full",
+    "mode": "full",
+    "trainable_parameters": 494032768,
+    "total_parameters": 494032768,
+    "peak_memory_bytes": 10777518080,
+    "wall_time_seconds": 130.19555720000062,
+    "final_train_loss": 2.1785223364830015,
+    "eval_loss": 2.338517177952481,
+    "artifact_dir": "ckpt\\sft\\s1-full"
+  },
+  "lora": {
+    "name": "s1-lora",
+    "mode": "lora",
+    "trainable_parameters": 540672,
+    "total_parameters": 494573440,
+    "peak_memory_bytes": 3310899200,
+    "wall_time_seconds": 68.94807220000075,
+    "final_train_loss": 1.1568965166807175,
+    "eval_loss": 1.101452565557665,
+    "artifact_dir": "ckpt\\sft\\s1-lora"
+  }
+}

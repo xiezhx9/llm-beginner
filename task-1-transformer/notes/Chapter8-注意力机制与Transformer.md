@@ -22,7 +22,7 @@ aliases:
 传统 RNN/LSTM 按时间顺序处理 token：
 
 $$
-h_t=\operatorname{LSTMCell}(x_t,h_{t-1},c_{t-1})
+h_t=\mathrm{LSTMCell}(x_t,h_{t-1},c_{t-1})
 $$
 
 虽然 LSTM 用记忆状态 $c_t$ 缓解了长期依赖问题，但仍有两个主要限制：
@@ -127,9 +127,9 @@ Q、K、V 的维度不是数学上必须与 $X$ 相同，而是常见的工程�
 ### 4.1 完整公式
 
 $$
-\operatorname{Attention}(Q,K,V)
+\mathrm{Attention}(Q,K,V)
 =
-\operatorname{softmax}\left(
+\mathrm{softmax}\left(
 \frac{QK^\top}{\sqrt{d_k}}+M
 \right)V
 $$
@@ -181,7 +181,7 @@ $$
 近似有：
 
 $$
-\operatorname{Var}(q^\top k)\approx d_k
+\mathrm{Var}(q^\top k)\approx d_k
 $$
 
 因此其标准差约为：
@@ -193,7 +193,7 @@ $$
 除以 $\sqrt{d_k}$ 后：
 
 $$
-\operatorname{Var}\left(
+\mathrm{Var}\left(
 \frac{q^\top k}{\sqrt{d_k}}
 \right)\approx1
 $$
@@ -409,9 +409,9 @@ output = self.Wo(context)
 多头只是把不同 head 的结果拼接起来。输出投影：
 
 $$
-\operatorname{MHA}(X)
+\mathrm{MHA}(X)
 =
-\operatorname{Concat}(head_1,\ldots,head_H)W_O
+\mathrm{Concat}(head_1,\ldots,head_H)W_O
 $$
 
 允许模型重新混合各个 head 的信息，并把输出映射回统一的 $D$ 维特征空间，方便残差相加。
@@ -445,7 +445,7 @@ $$
 位置编码通常在进入第一个 Transformer Block 之前加入：
 
 $$
-X_0=\operatorname{Embedding}(input\_ids)+PE
+X_0=\mathrm{Embedding}(input\_ids)+PE
 $$
 
 `max_len` 用于提前生成足够长的位置编码表，并注册为 buffer：
@@ -470,9 +470,9 @@ $$
 Z
 =
 X+
-\operatorname{Dropout}
+\mathrm{Dropout}
 \left(
-\operatorname{MHA}(\operatorname{LN}(X),M)
+\mathrm{MHA}(\mathrm{LN}(X),M)
 \right)
 $$
 
@@ -480,18 +480,18 @@ $$
 Y
 =
 Z+
-\operatorname{Dropout}
+\mathrm{Dropout}
 \left(
-\operatorname{FFN}(\operatorname{LN}(Z))
+\mathrm{FFN}(\mathrm{LN}(Z))
 \right)
 $$
 
 其中：
 
 $$
-\operatorname{FFN}(x)
+\mathrm{FFN}(x)
 =
-W_2\,\operatorname{GELU}(W_1x+b_1)+b_2
+W_2\,\mathrm{GELU}(W_1x+b_1)+b_2
 $$
 
 ### 8.1 LayerNorm

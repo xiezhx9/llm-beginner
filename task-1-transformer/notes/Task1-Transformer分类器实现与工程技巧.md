@@ -249,7 +249,7 @@ output = self.Wo(attn)
 多头拼接后虽然已经回到 $D$ 维，$W_O$ 仍用于混合各 head 信息。它还保证输出形状与原始 $x$ 一致，可以直接执行：
 
 $$
-x+\operatorname{MHA}(x)
+x+\mathrm{MHA}(x)
 $$
 
 ## 7. Transformer Block
@@ -269,11 +269,11 @@ z = y + self.dropout2(
 数学形式：
 
 $$
-y=x+\operatorname{Dropout}(\operatorname{MHA}(\operatorname{LN}(x)))
+y=x+\mathrm{Dropout}(\mathrm{MHA}(\mathrm{LN}(x)))
 $$
 
 $$
-z=y+\operatorname{Dropout}(\operatorname{FFN}(\operatorname{LN}(y)))
+z=y+\mathrm{Dropout}(\mathrm{FFN}(\mathrm{LN}(y)))
 $$
 
 > [!tip] Trick：Pre-LN 帮助深层训练
